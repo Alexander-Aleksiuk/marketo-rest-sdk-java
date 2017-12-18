@@ -81,9 +81,13 @@ public class JaxRsHttpCommandExecutor implements HttpCommandExecutor {
 
         MarketoResponse<T> marketoResponse;
         if ("POST".equalsIgnoreCase(command.getMethod())) {
-            Form form = toForm(processParameters(command.getParameters(), false));
-            Entity<?> entity = Entity.entity(form, MediaType.APPLICATION_FORM_URLENCODED_TYPE.withCharset("UTF-8"));
-            marketoResponse = invocationBuilder.post(entity, typeToken);
+            if (MediaType.APPLICATION_JSON_TYPE.equals(command.getMediaType())) {
+                marketoResponse = invocationBuilder.post(Entity.json(command.getParameters()), typeToken);
+            } else {
+                Form form = toForm(processParameters(command.getParameters(), false));
+                Entity<?> entity = Entity.entity(form, MediaType.APPLICATION_FORM_URLENCODED_TYPE.withCharset("UTF-8"));
+                marketoResponse = invocationBuilder.post(entity, typeToken);
+            }
         } else {
             marketoResponse = invocationBuilder.method(command.getMethod(), typeToken);
         }
